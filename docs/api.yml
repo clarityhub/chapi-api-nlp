@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  version: "1"
+  title: "Clarity Hub NLP Service API"
+  description: "This API handles running NLP and Machine Learning algorithms on utterances"
+components:
+  parameters:
+    organization:
+      in: header
+      name: X-Clarityhub-Organization
+      schema:
+        type: string
+        format: uuid
+      required: true
+  schemas:
+    HealthResponse:
+      $ref: ../schemas/healthResponse.json
+    ModelCreateResponse:
+      $ref: ../schemas/modelCreateResponse.json
+    ToxicityPostRequest:
+      $ref: ../schemas/toxicityPostRequest.json
+    ToxicityPostResponse:
+      $ref: ../schemas/toxicityPostResponse.json
+    LanguagePostRequest:
+      $ref: ../schemas/languagePostRequest.json
+    LanguagePostResponse:
+      $ref: ../schemas/languagePostResponse.json
+    SentimentPostRequest:
+      $ref: ../schemas/sentimentPostRequest.json
+    SentimentPostResponse:
+      $ref: ../schemas/sentimentPostResponse.json
+    TopicsPostRequest:
+      $ref: ../schemas/topicsPostRequest.json
+    TopicsPostResponse:
+      $ref: ../schemas/topicsPostResponse.json
+    EmbedPostRequest:
+      $ref: ../schemas/embedPostRequest.json
+    EmbedPostResponse:
+      $ref: ../schemas/embedPostResponse.json
+  securitySchemes:
+    AWSAuth:
+      name: X-Amz-Security-Token
+      type: apiKey
+      in: header
+    BearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  "/health":
+    $ref: ./health.yml#/documentation
+  "/toxicity":
+    $ref: ./toxicity.yml#/documentation
+  "/sentiment":
+    $ref: ./sentiment.yml#/documentation
+  "/topics":
+    $ref: ./topics.yml#/documentation
+  "/embed":
+    $ref: ./embed.yml#/documentation

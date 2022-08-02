@@ -1,0 +1,33 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Sentiment Response",
+    "required": [
+        "items"
+    ],
+    "properties": {
+        "items": {
+            "type": "array",
+            "title": "items",
+            "items": {
+                "type": "object",
+                "required": [
+                    "utterance"
+                ],
+                "properties": {
+                    "utterance": {
+                        "type": "string" 
+                    },
+                    "topics": {
+                        "title": "topics",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Sentiment Request",
+    "required": [
+        "utterances"
+    ],
+    "properties": {
+        "utterances": {
+            "type": "array",
+            "maxItems": 1000,
+            "title": "items",
+            "items": {
+                "type": "string",
+                "title": "Utterances"
+            }
+        }
+    }
+}

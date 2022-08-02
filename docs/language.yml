@@ -1,0 +1,24 @@
+documentation:
+  post:
+    operationId: languagePost
+    summary: "Check an utterance for language"
+    description: "Check an utterance for language. Longer utterances usually provide better results."
+    tags:
+      - "language"
+    security:
+      - BearerAuth: []
+    requestBody:
+      description: >-
+        Send the utterance(s) you want to check
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LanguagePostRequest'
+    responses:
+      "200":
+        description: Utterance Results
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LanguagePostResponse'

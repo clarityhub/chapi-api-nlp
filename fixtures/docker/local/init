@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -e
+
+npm install --no-progress > /dev/null
+# npm i -g node-gyp
+
+source ./fixtures/deploy/variables/local.sh
+
+serverless dynamodb install
+
+# Make sure that the proper node bindings exist for tensorflow
+# npm rebuild -f @tensorflow/tfjs-node
+
+# These might help
+# npm install bindings
+# npm install bcrypt
+# node-gyp rebuild @tensorflow/tfjs-node
+# (cd node_modules/@tensorflow/tfjs-node; node-gyp build)
+
+npm run docs:build
+
+# python3 --version
+
+SLS_DEBUG=* serverless offline start --host=0.0.0.0 --stage local

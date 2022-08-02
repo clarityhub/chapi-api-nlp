@@ -1,0 +1,24 @@
+documentation:
+  post:
+    operationId: topicsPost
+    summary: "Check an utterance for topics"
+    description: "Check an utterance for topics"
+    tags:
+      - "topics"
+    security:
+      - BearerAuth: []
+    requestBody:
+      description: >-
+        Send the utterance(s) you want to check
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TopicsPostRequest'
+    responses:
+      "200":
+        description: Utterance Results
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicsPostResponse'

@@ -1,0 +1,35 @@
+documentation:
+  post:
+    operationId: toxicityPost
+    summary: "Check an utterance for toxicity"
+    description: "Check an utterance for toxicity"
+    tags:
+      - "toxicity"
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: threshold
+        schema:
+          type: integer
+        description: The threshold to return true for a toxicity dimension
+      - in: query
+        name: probabilities
+        schema:
+          type: boolean
+        description: Return the raw probabilities for whether a dimension is true, instead of a boolean
+    requestBody:
+      description: >-
+        Send the utterance(s) you want to check
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ToxicityPostRequest'
+    responses:
+      "200":
+        description: Utterance Results
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToxicityPostResponse'

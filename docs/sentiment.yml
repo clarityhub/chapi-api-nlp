@@ -1,0 +1,24 @@
+documentation:
+  post:
+    operationId: sentimentPost
+    summary: "Check an utterance for sentiment"
+    description: "Check an utterance for sentiment"
+    tags:
+      - "sentiment"
+    security:
+      - BearerAuth: []
+    requestBody:
+      description: >-
+        Send the utterance(s) you want to check
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SentimentPostRequest'
+    responses:
+      "200":
+        description: Utterance Results
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SentimentPostResponse'

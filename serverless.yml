@@ -1,0 +1,246 @@
+service: clarityhub-api-nlp
+# frameworkVersion: "=1.45.1"
+
+plugins:
+  # HEADS UP: You can't use the webpack plugin with tensorflow.
+  # Tensorflow will ntop working.
+  # - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  bugsnagApiKey: 
+  dynamodb:
+    start:
+      port: 8000
+      migrate: true
+  serverless-offline:
+    port: 4000
+  cors:
+    origin: '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+      - X-ClarityHub-Organization
+    allowCredentials: false
+  apiDocs: ${file(./docs/api.yml)}
+  authorizer:
+    local:
+      name: localAccessKeyAuthorizer
+      resultTtlInSeconds: 0
+      identitySource: method.request.header.Authorization
+    development:
+      arn: 
+      resultTtlInSeconds: 0
+      identitySource: method.request.header.Authorization
+      type: request
+    production:
+      arn: 
+      resultTtlInSeconds: 0
+      identitySource: method.request.header.Authorization
+      type: request
+  accountsEndpoint:
+    local:
+    development:
+    production:
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'local'}
+  region: ${env:AWS_REGION, 'us-west-2'}
+  memorySize: 512
+  timeout: 20
+  environment:
+    AWS_ACCOUNTS_ENDPOINT: ${self:custom.accountsEndpoint.${self:custom.stage}}
+    BUGSNAG_API_KEY: ${self:custom.bugsnagApiKey}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:ListTables
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-west-2:*:*"
+
+package:
+  individually: true
+  include:
+    - docs/**
+    - schemas/**
+  exclude:
+    - node_modules/aws-sdk/**
+    - .dynamodb/**
+    - build/**
+    - data/**
+    - fixtures/**
+    - resources/**
+    - .gitignore
+    - .gitconfig
+    - .editorconfig
+    - .eslintignore
+    - .eslintrc
+    - .npmrc
+    - .nycrc
+    - .npmignore
+    - '*coveralls.yml'
+    - .circleci/**
+    - '*circle.yml'
+    - '*travis.yml'
+    - '*.md'
+    - '*.apib'
+    - .vscode/**
+    - package-lock.json
+    - .npm-upgrade.json
+    - sonar-project.properties
+    - rollup.config.*
+    - yarn.lock
+    # common project directories
+    - coverage/**
+    - .nyc_output/**
+    - docs/**
+    - test/**
+    - tests/**
+    - CODEOWNERS
+    # aws-sdk is included in Lambda
+    - node_modules/**/aws-sdk/**
+    # common things that node_modules fail to .npmignore
+    - node_modules/**/*.md
+    - node_modules/**/*.flow
+    - node_modules/**/*.patch
+    - node_modules/**/*.conf
+    - node_modules/**/*.markdown
+    - node_modules/**/*.coffee
+    - node_modules/**/jsdoc_conf.json
+    - node_modules/**/*Makefile
+    - node_modules/**/Dockerfile
+    - node_modules/**/*.txt
+    - node_modules/**/*.yml
+    - node_modules/**/*.xml
+    - node_modules/**/*.html
+    - node_modules/**/test/**
+    - node_modules/**/tests/**
+    - node_modules/**/docs/**
+    - node_modules/**/examples/**
+    - node_modules/**/coverage/**
+    - node_modules/**/.nyc_output/**
+    - node_modules/**/bin/**
+    - node_modules/**/bower.json
+    - node_modules/**/karma.conf.js
+    - node_modules/**/Gruntfile.js
+    - node_modules/**/rollup.config.*		
+    - node_modules/**/yarn.lock
+    - node_modules/**/sonar-project.properties	
+    - node_modules/**/package-lock.json
+    - node_modules/**/*.d.ts
+    - node_modules/**/*.map
+    - node_modules/**/tsconfig.json
+    - node_modules/**/AUTHORS
+    - node_modules/**/CODEOWNERS
+    - node_modules/**/OWNERS
+    - node_modules/**/license*
+    - node_modules/**/licence*
+    - node_modules/**/LICENSE*
+    - node_modules/**/LICENCE*
+    - node_modules/**/License*
+    - node_modules/**/Licence*
+    - node_modules/**/*.iml
+    - node_module/**/*.bash_completion.in
+    # yes, these are real
+    - node_modules/**/*.gif
+    - node_modules/**/*.png
+    - node_modules/**/*.jpg
+    - node_modules/**/*.jpeg
+    # module-specific odd things
+    - node_modules/**/winston/scratch/**
+    - node_modules/**/sshpk/man/**
+    - node_modules/**/bluebird/js/browser/**
+    - node_modules/**/date-fns/docs.json
+    - node_modules/**/aws-xray-sdk-core/doc-src/**
+    # tensorflow things
+    - node_modules/**/benchmarks/**
+
+functions:
+  # ===== Authorizors =====
+  localAccessKeyAuthorizer:
+    handler: src/routes/localAccessKeyAuthorizer.default
+
+  # ===== Health Endpoint =====
+  health:
+    handler: src/routes/health.default
+    events:
+      - http:
+          path: health
+          method: GET
+
+  # ===== Public Swagger Endpoint =====
+  swagger:
+    handler: src/routes/swagger.default
+    events:
+      - http:
+          path: swagger
+          method: GET
+          cors: true
+
+  # ===== NLP =====
+  toxicity:
+    handler: src/routes/toxicity.default
+    memorySize: 1024
+    events:
+      - http:
+          path: toxicity
+          method: POST
+          authorizer: ${self:custom.authorizer.${self:custom.stage}}
+          parameters:
+            querystrings:
+              threshold: false
+              percentages: false
+
+  language:
+    handler: src/routes/simpleNLP.language
+    events:
+      - http:
+          path: language
+          method: POST
+          authorizer: ${self:custom.authorizer.${self:custom.stage}}
+
+  sentiment:
+    handler: src/routes/simpleNLP.sentiment
+    events:
+      - http:
+          path: sentiment
+          method: POST
+          authorizer: ${self:custom.authorizer.${self:custom.stage}}
+
+  topics:
+    handler: src/routes/simpleNLP.topics
+    events:
+      - http:
+          path: topics
+          method: POST
+          authorizer: ${self:custom.authorizer.${self:custom.stage}}
+
+  embed:
+    handler: src/routes/use.embed
+    memorySize: 1024
+    events:
+      - http:
+          path: embed
+          method: POST
+          authorizer: ${self:custom.authorizer.${self:custom.stage}}
+
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB
+  - ${file(resources/dynamodb-table.yml)}

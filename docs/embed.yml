@@ -1,0 +1,24 @@
+documentation:
+  post:
+    operationId: embedPost
+    summary: "Get embeddings from utterances"
+    description: "Get embeddings from utterances"
+    tags:
+      - "embed"
+    security:
+      - BearerAuth: []
+    requestBody:
+      description: >-
+        Send the utterance(s) you want to get embeddings for
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmbedPostRequest'
+    responses:
+      "200":
+        description: Utterance Results
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbedPostResponse'
